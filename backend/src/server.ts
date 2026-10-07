@@ -2,8 +2,8 @@ import express from 'express';
 
 const app = express();
 
-app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok'});
-});
+const PORT = 3000;
 
-app.listen(4000, () => console.log('API running on http://localhost:3000'));
+app.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`)
+});
