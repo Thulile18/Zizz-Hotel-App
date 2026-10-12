@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import { env } from './config/env';
 import { pool } from './config/db';
 import authRoutes from './routes/authRoutes';
+import hotelRoutes from './routes/hotelRoutes';
 import { requireLogin, AuthRequest } from './middleware/auth';
 
 // 2. Configuration
@@ -17,6 +18,7 @@ app.use(express.json());
 
 // 4. Endpoints
 app.use('/api/auth', authRoutes);
+app.use('/api/hotels', hotelRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
