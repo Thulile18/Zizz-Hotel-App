@@ -7,6 +7,7 @@ import { pool } from './config/db';
 import authRoutes from './routes/authRoutes';
 import hotelRoutes from './routes/hotelRoutes';
 import { requireLogin, AuthRequest } from './middleware/auth';
+import bookingRoutes from './routes/bookingRoutes';
 
 // 2. Configuration
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.json());
 // 4. Endpoints
 app.use('/api/auth', authRoutes);
 app.use('/api/hotels', hotelRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });

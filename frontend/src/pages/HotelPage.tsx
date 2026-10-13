@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../api';
+import BookingPanel from '../components/BookingPanel';
 
 interface Room {
   id: number;
@@ -88,6 +89,8 @@ export default function HotelPage() {
       {message && <p>{message}</p>}
 
       {hotel.description && <p>{hotel.description}</p>}
+
+      <BookingPanel rooms={hotel.rooms} />
 
       <h3>Rooms and prices</h3>
       <ul className="rooms">
