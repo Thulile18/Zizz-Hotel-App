@@ -14,3 +14,21 @@ export async function createUser(name: string, email: string, passwordHash: stri
   );
   return result.rows[0];
 }
+
+// Find a user by id (never includes the password)
+export async function findUserById(id: number) {
+  const result = await pool.query(
+    'SELECT id, name, email, phone, role FROM users WHERE id = $1',
+    [id]
+  );
+  return result.rows[0];
+}
+
+// Change a user's name and phone
+export async function updateUserProfile(id: number, name: string, phone: string | null) {
+  const result = await pool.query(
+    'UPDATE users SET name = $1, phone = $2 WHERE id = $3 RETURNING id, name, email, phone, role',
+    [name, phone, id]
+  );
+  return result.rows[0];
+}
