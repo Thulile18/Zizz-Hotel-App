@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../api';
 import BookingPanel from '../components/BookingPanel';
+import SaveButton from '../components/SaveButton';
+import ReviewForm from '../components/ReviewForm';
 
 interface Room {
   id: number;
@@ -40,10 +42,15 @@ export default function HotelPage() {
   const [photo, setPhoto] = useState(0);
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
+function loadHotel() {
     api<HotelDetails>(`/hotels/${id}`)
       .then(setHotel)
       .catch((err) => setError((err as Error).message));
+  }
+
+  useEffect(() => {
+    loadHotel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   async function share() {
@@ -85,6 +92,7 @@ export default function HotelPage() {
       <p>
         {hotel.address}, {hotel.city}
       </p>
+      <button onClick={share}>Share</button><SaveButton hotelId={hotel.id} />
       <button onClick={share}>Share</button>
       {message && <p>{message}</p>}
 
@@ -132,6 +140,7 @@ export default function HotelPage() {
           {r.comment}
         </p>
       ))}
+      <ReviewForm hotelId={hotel.id} onPosted={loadHotel} />
     </div>
   );
 }
