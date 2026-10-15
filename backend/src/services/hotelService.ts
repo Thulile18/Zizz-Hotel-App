@@ -81,6 +81,14 @@ export async function editRoom(id: number, body: unknown) {
 }
 
 export async function removeHotel(id: number) {
-  const removed = await deleteHotel(id);
-  if (!removed) throw new HttpError(404, 'Hotel not found');
+  try {
+    const removed = await deleteHotel(id);
+    if (!removed) throw new HttpError(404, 'Hotel not found');
+  } catch (err) {
+    // 23503 is the database's code for "something still points at this row"
+    if ((err as { code?: string }).code === '23503') {
+      throw new HttpError(409, 'This hotel has bookings, so it cannot be deleted.');
+    }
+    throw err;
+  }
 }

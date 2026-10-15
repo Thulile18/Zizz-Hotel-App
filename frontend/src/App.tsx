@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import HotelPage from './pages/HotelPage';
 import BookingConfirmed from './pages/BookingConfirmed';
 import Profile from './pages/Profile';
+import AdminPage from './pages/AdminPage';
+import AdminHotels from './pages/AdminHotels';
 
 export default function App() {
   return (
@@ -17,6 +19,8 @@ export default function App() {
           <Route path="/hotels/:id" element={<HotelPage />} />
           <Route path="/booking-confirmed" element={<BookingConfirmed />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/hotels" element={<AdminHotels />} />
           <Route path="*" element={<p>Page not found.</p>} />
         </Routes>
       </main>
