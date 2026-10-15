@@ -212,3 +212,48 @@ select {
 .hello {
   color: #fff;
 }
+
+.scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+  vertical-align: top;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+textarea {
+  font: inherit;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  width: 100%;
+  min-height: 70px;
+}
+
+.wide {
+  max-width: none;
+}
+
+.formgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  align-items: end;
+}

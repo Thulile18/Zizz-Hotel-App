@@ -15,6 +15,11 @@ export default function Header() {
             <nav>
                 {user ? (
                     <>
+                        {user.role === 'admin' && (
+                            <Link to="/admin" className="hello">
+                                Admin
+                            </Link>
+                        )}
                         <Link to="/profile" className="hello">
                             Hi, {user.name}
                         </Link>
