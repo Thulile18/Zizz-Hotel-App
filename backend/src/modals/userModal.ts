@@ -32,3 +32,12 @@ export async function updateUserProfile(id: number, name: string, phone: string 
   );
   return result.rows[0];
 }
+
+// Create a user who signed up with GitHub (they have no password)
+export async function createOAuthUser(name: string, email: string) {
+  const result = await pool.query(
+    'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING id, name, email, role',
+    [name, email]
+  );
+  return result.rows[0];
+}
