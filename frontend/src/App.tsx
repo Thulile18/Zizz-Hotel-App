@@ -7,6 +7,7 @@ import BookingConfirmed from './pages/BookingConfirmed';
 import Profile from './pages/Profile';
 import AdminPage from './pages/AdminPage';
 import AdminHotels from './pages/AdminHotels';
+import GitHubCallback from './pages/GitHubCallback';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/github/callback" element={<GitHubCallback />} />
           <Route path="/hotels/:id" element={<HotelPage />} />
           <Route path="/booking-confirmed" element={<BookingConfirmed />} />
           <Route path="/profile" element={<Profile />} />

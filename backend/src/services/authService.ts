@@ -4,7 +4,7 @@ import { env } from '../config/env';
 import { findUserByEmail, createUser } from '../modals/userModal';
 
 // A login token: proof that the user logged in, valid for 7 days
-function makeToken(user: { id: number; role: string }) {
+export function makeToken(user: { id: number; role: string }) {
   return jwt.sign({ id: user.id, role: user.role }, env.JWT_SECRET, { expiresIn: '7d' });
 }
 

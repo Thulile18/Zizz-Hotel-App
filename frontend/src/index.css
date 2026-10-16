@@ -257,3 +257,13 @@ textarea {
   gap: 10px;
   align-items: end;
 }
+
+.github {
+  display: block;
+  text-align: center;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: #24292f;
+  color: #fff;
+  text-decoration: none;
+}

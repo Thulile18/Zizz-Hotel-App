@@ -66,6 +66,13 @@ export default function Login() {
         {busy ? 'Please wait...' : mode === 'login' ? 'Log in' : 'Sign up'}
       </button>
 
+      <a
+        className="github"
+        href={`https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&scope=user:email`}
+      >
+        Sign in with GitHub
+      </a>
+
       <button
         type="button"
         className="link"
