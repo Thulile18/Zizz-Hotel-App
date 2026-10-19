@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAppDispatch } from '../store/hooks';
 import { loggedIn } from '../store/authSlice';
@@ -14,6 +14,7 @@ export default function Login() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [consent, setConsent] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -22,7 +23,8 @@ export default function Login() {
     setError('');
     setBusy(true);
     try {
-      const body = mode === 'login' ? { email, password } : { name, email, password };
+      const body =
+        mode === 'login' ? { email, password } : { name, email, password, consent };
       const result = await api<{ user: User; token: string }>(`/auth/${mode}`, 'POST', body);
       dispatch(loggedIn(result));
       navigate('/');
@@ -60,9 +62,22 @@ export default function Login() {
         required
       />
 
+      {mode === 'register' && (
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+          />
+          <span>
+            I agree to the <Link to="/privacy">privacy policy</Link>.
+          </span>
+        </label>
+      )}
+
       {error && <p className="error">{error}</p>}
 
-      <button className="cta" type="submit" disabled={busy}>
+      <button className="cta" type="submit" disabled={busy || (mode === 'register' && !consent)}>
         {busy ? 'Please wait...' : mode === 'login' ? 'Log in' : 'Sign up'}
       </button>
 
@@ -72,6 +87,9 @@ export default function Login() {
       >
         Sign in with GitHub
       </a>
+      <small>
+        By signing in with GitHub you agree to our <Link to="/privacy">privacy policy</Link>.
+      </small>
 
       <button
         type="button"
