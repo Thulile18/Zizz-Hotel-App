@@ -80,3 +80,15 @@ CREATE TABLE notifications (
   message    TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- INDEXES: keep searches fast as the data grows
+CREATE INDEX IF NOT EXISTS idx_hotels_city ON hotels (city);
+CREATE INDEX IF NOT EXISTS idx_rooms_hotel_price ON rooms (hotel_id, price_per_night);
+CREATE INDEX IF NOT EXISTS idx_hotel_images_hotel ON hotel_images (hotel_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_room_dates ON bookings (room_id, check_in, check_out);
+CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings (user_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_hotel ON reviews (hotel_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications (user_id, id DESC);
+
+-- PRIVACY: the time a user agreed to the privacy policy
+ALTER TABLE users ADD COLUMN IF NOT EXISTS consented_at TIMESTAMPTZ;

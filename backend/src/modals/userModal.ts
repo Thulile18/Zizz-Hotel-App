@@ -9,7 +9,8 @@ export async function findUserByEmail(email: string) {
 // Save a new user and give back their details (never the password)
 export async function createUser(name: string, email: string, passwordHash: string) {
   const result = await pool.query(
-    'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, role',
+    `INSERT INTO users (name, email, password_hash, consented_at)
+     VALUES ($1, $2, $3, now()) RETURNING id, name, email, role`,
     [name, email, passwordHash]
   );
   return result.rows[0];
@@ -36,8 +37,62 @@ export async function updateUserProfile(id: number, name: string, phone: string 
 // Create a user who signed up with GitHub (they have no password)
 export async function createOAuthUser(name: string, email: string) {
   const result = await pool.query(
-    'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING id, name, email, role',
+    `INSERT INTO users (name, email, consented_at)
+     VALUES ($1, $2, now()) RETURNING id, name, email, role`,
     [name, email]
   );
   return result.rows[0];
+}
+
+// Everything we hold about one user, for the "download my data" button
+export async function exportUserData(id: number) {
+  const profile = await pool.query(
+    'SELECT id, name, email, phone, role, created_at, consented_at FROM users WHERE id = $1',
+    [id]
+  );
+  const bookings = await pool.query(
+    `SELECT b.id, b.check_in, b.check_out, b.rooms_booked, b.guests, b.total_price,
+            b.status, b.created_at, h.name AS hotel, r.type AS room_type
+     FROM bookings b
+     JOIN rooms r ON r.id = b.room_id
+     JOIN hotels h ON h.id = r.hotel_id
+     WHERE b.user_id = $1 ORDER BY b.created_at`,
+    [id]
+  );
+  const favourites = await pool.query(
+    'SELECT h.name, h.city FROM favourites f JOIN hotels h ON h.id = f.hotel_id WHERE f.user_id = $1',
+    [id]
+  );
+  const reviews = await pool.query(
+    'SELECT h.name AS hotel, rv.rating, rv.comment FROM reviews rv JOIN hotels h ON h.id = rv.hotel_id WHERE rv.user_id = $1',
+    [id]
+  );
+  const notifications = await pool.query(
+    'SELECT message, created_at FROM notifications WHERE user_id = $1 ORDER BY id',
+    [id]
+  );
+  return {
+    profile: profile.rows[0],
+    bookings: bookings.rows,
+    favourites: favourites.rows,
+    reviews: reviews.rows,
+    notifications: notifications.rows,
+  };
+}
+
+// "Delete" an account: wipe the personal details, keep the booking records.
+// One statement does everything, so it either all happens or none of it does.
+export async function anonymiseUser(id: number) {
+  await pool.query(
+    `WITH f AS (DELETE FROM favourites WHERE user_id = $1),
+          n AS (DELETE FROM notifications WHERE user_id = $1)
+     UPDATE users
+     SET name = 'Deleted guest',
+         email = 'deleted-' || id || '@deleted.invalid',
+         phone = NULL,
+         password_hash = NULL,
+         consented_at = NULL
+     WHERE id = $1`,
+    [id]
+  );
 }

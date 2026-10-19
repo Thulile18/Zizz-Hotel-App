@@ -4,6 +4,7 @@ import { api } from '../api';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { loggedIn } from '../store/authSlice';
 import type { User } from '../store/authSlice';
+import PrivacyControls from '../components/PrivacyControls';
 
 interface Profile extends User {
   phone: string | null;
@@ -164,6 +165,7 @@ export default function ProfilePage() {
           {n.message} <small>({showDate(n.created_at)})</small>
         </p>
       ))}
+      <PrivacyControls/>
     </div>
   );
 }

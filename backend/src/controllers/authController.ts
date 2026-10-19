@@ -7,6 +7,7 @@ const registerSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Enter a valid email'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
+  consent: z.literal(true, { message: 'Please accept the privacy policy to create an account' }),
 });
 
 const loginSchema = z.object({
