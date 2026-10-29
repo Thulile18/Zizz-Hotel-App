@@ -16,16 +16,26 @@ const roomSchema = z.object({
   capacity: z.number().int().min(1, 'A room must sleep at least 1 guest'),
   price_per_night: z.number().positive('Price must be more than 0'),
   total_rooms: z.number().int().min(0, 'Number of rooms cannot be negative'),
+  image_path: z.string().optional(),
+  description: z.string().optional(),
+  amenities: z.array(z.string()).optional(),
 });
 
 const hotelFields = z.object({
   name: z.string().min(1, 'Hotel name is required'),
+  slug: z.string().optional(),
+  tagline: z.string().optional(),
   description: z.string().optional(),
   address: z.string().min(1, 'Address is required'),
   city: z.string().min(1, 'City is required'),
+  region: z.string().optional(),
+  country: z.string().optional(),
   lat: z.number().optional(),
   lng: z.number().optional(),
   stars: z.number().int().min(1, 'Stars must be 1 to 5').max(5, 'Stars must be 1 to 5'),
+  is_featured: z.boolean().optional(),
+  property_type: z.string().optional(),
+  tags: z.array(z.string()).optional(),
   facilities: z.array(z.string()).default([]),
   policies: z.string().optional(),
 });
@@ -53,7 +63,8 @@ export function listHotels(query: Record<string, unknown>) {
   const maxPrice = Number(query.maxPrice) || 100000;
   const minStars = Number(query.minStars) || 0;
   const page = Math.max(1, Number(query.page) || 1);
-  return searchHotels(q, maxPrice, minStars, page);
+  const limit = Math.min(100, Math.max(1, Number(query.limit) || 100));
+  return searchHotels(q, maxPrice, minStars, page, limit);
 }
 
 export async function getHotel(id: number) {
