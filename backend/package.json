@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-     "test": "tsx --test src/tests/auth.test.ts",
+    "start": "node dist/server.ts",
      "dev": "tsx watch src/server.ts" 
   },
   "keywords": [],
