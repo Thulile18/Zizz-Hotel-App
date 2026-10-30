@@ -22,6 +22,7 @@ export default function ReviewForm({ hotelId, onPosted }: { hotelId: number; onP
     try {
       await api(`/reviews/${hotelId}`, 'PUT', { rating, comment });
       setMessage('Thank you for your review!');
+      setComment('');
       onPosted(); // refresh the reviews list
     } catch (err) {
       setError((err as Error).message);
@@ -29,10 +30,11 @@ export default function ReviewForm({ hotelId, onPosted }: { hotelId: number; onP
   }
 
   return (
-    <div className="panel">
-      <h4>Leave a review</h4>
-      <label>
-        Rating
+    <div className="v-panel fade-up" style={{ maxWidth: '36rem' }}>
+      <p className="eyebrow">Leave a review</p>
+
+      <div>
+        <label className="v-label">Rating</label>
         <select value={rating} onChange={(e) => setRating(Number(e.target.value))}>
           {[5, 4, 3, 2, 1].map((n) => (
             <option key={n} value={n}>
@@ -40,14 +42,22 @@ export default function ReviewForm({ hotelId, onPosted }: { hotelId: number; onP
             </option>
           ))}
         </select>
-      </label>
-      <label>
-        Your comment
-        <input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="How was your stay?" />
-      </label>
-      {message && <p>{message}</p>}
-      {error && <p className="error">{error}</p>}
-      <button className="cta" onClick={post}>
+      </div>
+
+      <div>
+        <label className="v-label">Your comment</label>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="How was your stay?"
+          rows={4}
+        />
+      </div>
+
+      {message && <p className="v-msg v-msg-ok" style={{ margin: 0 }}>{message}</p>}
+      {error && <p className="v-msg v-msg-err" style={{ margin: 0 }}>{error}</p>}
+
+      <button className="v-btn v-btn-block" onClick={post}>
         {user ? 'Post review' : 'Log in to review'}
       </button>
     </div>

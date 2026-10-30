@@ -86,3 +86,7 @@ Database indexes, paged search results, response compression, a limited database
 • Reviews require a confirmed booking but do not yet check that the stay is over..
 • Notifications are shown in the app only (no email or push)..
 • Rate limits are counted in server memory, so they reset when the server restarts..
+- Offers are displayed, but the discount is not yet applied to the Stripe price.
+- Changing an email or password does not sign out other devices, and emails are not verified.
+- The currency switcher uses fixed approximate rates. All payments are charged in rand (ZAR).
+- Place search uses OpenStreetMap's free service, which is meant for light use.

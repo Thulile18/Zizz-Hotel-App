@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "tsx --test src/tests/auth.test.ts",
-    "dev": "tsx src/server.ts"
+    "build": "tsc",
+     "test": "tsx --test src/tests/auth.test.ts",
+     "dev": "tsx watch src/server.ts" 
   },
   "keywords": [],
   "author": "",

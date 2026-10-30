@@ -8,12 +8,19 @@ export const env = {
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || '',
   GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || '',
+  DATABASE_SSL: process.env.DATABASE_SSL || '',
 };
 
-// Stop at start-up if the signing secret is missing, instead of failing later
-if (!env.JWT_SECRET) {
-  throw new Error('JWT_SECRET is missing. Add it to backend/.env');
+//  Database Guardrail
+if (!env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is missing. Please add your Neon connection string to your environment config.');
 }
+
+//  Security Guardrail
+if (!env.JWT_SECRET) {
+  throw new Error('JWT_SECRET is missing. Add it to your environment config.');
+}
+
 if (env.JWT_SECRET.length < 32) {
   console.warn('Warning: JWT_SECRET is short. Use at least 32 random characters.');
 }

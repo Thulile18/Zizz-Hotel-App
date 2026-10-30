@@ -4,6 +4,7 @@ import { findBookingById, findRoomById, setBookingStatus } from '../modals/booki
 import { createNotification } from '../modals/notificationModal';
 import {
   listAllBookings, countBookedRoomsExcluding, updateBookingDates, notifyAllGuests,
+  markCheckedIn, markCheckedOut,
 } from '../modals/adminModal';
 
 // ---- The rules ----
@@ -15,10 +16,13 @@ const changeSchema = z.object({
   }).optional(),
   checkIn: date.optional(),
   checkOut: date.optional(),
+  action: z.enum(['check_in', 'check_out'], {
+    message: 'Action must be check_in or check_out',
+  }).optional(),
 });
 
 const promotionSchema = z.object({
-  message: z.string().min(1, 'Write a message').max(300, 'Keep the message under 300 characters'),
+  message: z.string().trim().min(1, 'Write a message').max(300, 'Keep the message under 300 characters'),
 });
 
 // Turns a database date into "2026-12-10" (in our own time zone)
@@ -33,12 +37,36 @@ export function allReservations() {
   return listAllBookings();
 }
 
-// Approve, cancel or move a reservation
+// Front desk: record that a guest has arrived or has left
+async function recordStay(bookingId: number, action: 'check_in' | 'check_out') {
+  const booking = await findBookingById(bookingId);
+  if (!booking) throw new HttpError(404, 'Booking not found');
+
+  if (action === 'check_in') {
+    if (booking.status !== 'confirmed') throw new HttpError(409, 'Only confirmed bookings can be checked in');
+    if (booking.checked_in_at) throw new HttpError(409, 'This guest is already checked in');
+    await markCheckedIn(bookingId);
+    await createNotification(booking.user_id, `You are checked in for booking #${bookingId}. Enjoy your stay!`);
+  } else {
+    if (!booking.checked_in_at) throw new HttpError(409, 'Check the guest in before checking them out');
+    if (booking.checked_out_at) throw new HttpError(409, 'This guest is already checked out');
+    await markCheckedOut(bookingId);
+    await createNotification(
+      booking.user_id,
+      `You have checked out of booking #${bookingId}. Thank you for staying with VELOUR. You can now leave a review on the hotel's page.`
+    );
+  }
+  return { id: bookingId, action };
+}
+
+// Approve, cancel or move a reservation, or check a guest in or out
 export async function changeReservation(bookingId: number, body: unknown) {
   const parsed = changeSchema.safeParse(body);
   if (!parsed.success) throw new HttpError(400, parsed.error.issues[0].message);
-  const { status, checkIn, checkOut } = parsed.data;
-  if (!status && !checkIn && !checkOut) throw new HttpError(400, 'Nothing to change');
+  const { status, checkIn, checkOut, action } = parsed.data;
+  if (!status && !checkIn && !checkOut && !action) throw new HttpError(400, 'Nothing to change');
+
+  if (action) return recordStay(bookingId, action);
 
   const booking = await findBookingById(bookingId);
   if (!booking) throw new HttpError(404, 'Booking not found');

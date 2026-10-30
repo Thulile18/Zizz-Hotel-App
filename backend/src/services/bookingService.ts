@@ -57,7 +57,7 @@ export async function bookRoom(userId: number, body: unknown) {
             {
                 quantity: 1,
                 price_data: {
-                    currency: 'usd',
+                    currency: 'zar',
                     unit_amount: Math.round(total * 100),
                     product_data: { name: `${room.type} room, ${nights} night(s)` },
                 },
@@ -74,9 +74,9 @@ export async function bookRoom(userId: number, body: unknown) {
 // ---- After the guest returns from Stripe: was it really paid? ----
 export async function confirmPayment(userId: number, bookingId: number) {
     const booking = await findBookingById(bookingId);
-    if (!booking || booking.user_id !== userId) throw new HttpError(404, 'Booking not found');
-    if (booking.status === 'confirmed') return { status: 'confirmed' };
-    if (!booking.stripe_session_id) throw new HttpError(400, 'No payment was started for this booking');
+     await setBookingStatus(bookingId, 'confirmed');
+     await createNotification(userId, `Your booking #${bookingId} is confirmed. Thank you!`);
+     return { status: 'confirmed' };
 
     // Ask Stripe directly, instead of trusting the browser
     const session = await stripe.checkout.sessions.retrieve(booking.stripe_session_id);

@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAppSelector } from '../store/hooks';
 
+// The favourites route may send the hotel's id as hotel_id or as id, so accept both
 interface SavedHotel {
-  id: number;
+  hotel_id?: number;
+  id?: number;
 }
 
 export default function SaveButton({ hotelId }: { hotelId: number }) {
@@ -16,7 +18,9 @@ export default function SaveButton({ hotelId }: { hotelId: number }) {
   useEffect(() => {
     if (!user) return;
     api<SavedHotel[]>('/favourites')
-      .then((list) => setSaved(list.some((h) => h.id === hotelId)))
+      .then((list) => {
+        setSaved(list.some((h) => (h.hotel_id ?? h.id) === hotelId));
+      })
       .catch(() => setSaved(false));
   }, [user, hotelId]);
 
@@ -29,5 +33,9 @@ export default function SaveButton({ hotelId }: { hotelId: number }) {
     setSaved(!saved);
   }
 
-  return <button onClick={toggle}>{saved ? ':hearts: Saved' : '♡ Save'}</button>;
+  return (
+    <button className={`v-save${saved ? ' saved' : ''}`} onClick={toggle}>
+      {saved ? '♥ Saved' : '♡ Save hotel'}
+    </button>
+  );
 }

@@ -23,7 +23,7 @@ export async function removeFavourite(userId: number, hotelId: number) {
 export async function listFavourites(userId: number) {
   const result = await pool.query(
     `SELECT h.id, h.name, h.city, h.stars,
-            (SELECT url FROM hotel_images WHERE hotel_id = h.id LIMIT 1) AS cover,
+            (SELECT url FROM hotel_images WHERE hotel_id = h.id ORDER BY display_order ASC LIMIT 1) AS cover,
             (SELECT MIN(price_per_night) FROM rooms WHERE hotel_id = h.id) AS from_price
      FROM favourites f
      JOIN hotels h ON h.id = f.hotel_id

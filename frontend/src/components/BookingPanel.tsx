@@ -5,7 +5,8 @@ import { useAppSelector } from '../store/hooks';
 
 interface Room {
   id: number;
-  type: string;
+  type?: string;
+  room_type?: string;
   capacity: number;
   price_per_night: string;
 }
@@ -14,7 +15,10 @@ export default function BookingPanel({ rooms }: { rooms: Room[] }) {
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.auth.user);
 
-  const [roomId, setRoomId] = useState(rooms[0]?.id ?? 0);
+  // Safely grab the first room option id if available
+  const initialRoomId = rooms && rooms.length > 0 ? rooms[0].id : 0;
+
+  const [roomId, setRoomId] = useState(initialRoomId);
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [roomCount, setRoomCount] = useState(1);
@@ -25,10 +29,9 @@ export default function BookingPanel({ rooms }: { rooms: Room[] }) {
   const room = rooms.find((r) => r.id === roomId);
   const today = new Date().toISOString().slice(0, 10);
 
-  // A friendly estimate. The server works out the real price again.
   const nights =
     checkIn && checkOut
-      ? Math.round((+new Date(checkOut) - +new Date(checkIn)) / 86_400_000)
+      ? Math.round((+new Date(checkOut) - +new Date(checkIn)) / 86400000)
       : 0;
   const total = room && nights > 0 ? nights * roomCount * Number(room.price_per_night) : 0;
 
@@ -47,7 +50,7 @@ export default function BookingPanel({ rooms }: { rooms: Room[] }) {
         rooms: roomCount,
         guests,
       });
-      window.location.href = result.checkoutUrl; // off to Stripe to pay
+      window.location.href = result.checkoutUrl;
     } catch (err) {
       setError((err as Error).message);
       setBusy(false);
@@ -55,68 +58,77 @@ export default function BookingPanel({ rooms }: { rooms: Room[] }) {
   }
 
   return (
-    <aside className="panel">
-      <h3>Book your stay</h3>
+    <aside className="v-panel">
+      <div>
+        <p className="eyebrow">Reservation</p>
+        <h3>Book your stay</h3>
+      </div>
 
-      <label>
-        Room
+      <div>
+        <label className="v-label">Room</label>
         <select value={roomId} onChange={(e) => setRoomId(Number(e.target.value))}>
           {rooms.map((r) => (
             <option key={r.id} value={r.id}>
-              {r.type} · ${Number(r.price_per_night)}/night · sleeps {r.capacity}
+              {r.room_type || r.type || 'Standard room'} · ${Number(r.price_per_night)}/night · sleeps {r.capacity}
             </option>
           ))}
         </select>
-      </label>
+      </div>
 
-      <label>
-        Check-in
-        <input type="date" min={today} value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
-      </label>
+      <div className="v-two">
+        <div>
+          <label className="v-label">Check-in</label>
+          <input type="date" min={today} value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
+        </div>
+        <div>
+          <label className="v-label">Check-out</label>
+          <input
+            type="date"
+            min={checkIn || today}
+            value={checkOut}
+            onChange={(e) => setCheckOut(e.target.value)}
+          />
+        </div>
+      </div>
 
-      <label>
-        Check-out
-        <input
-          type="date"
-          min={checkIn || today}
-          value={checkOut}
-          onChange={(e) => setCheckOut(e.target.value)}
-        />
-      </label>
-
-      <label>
-        Number of rooms
-        <input
-          type="number"
-          min="1"
-          value={roomCount}
-          onChange={(e) => setRoomCount(Number(e.target.value))}
-        />
-      </label>
-
-      <label>
-        Guests
-        <input
-          type="number"
-          min="1"
-          value={guests}
-          onChange={(e) => setGuests(Number(e.target.value))}
-        />
-      </label>
+      <div className="v-two">
+        <div>
+          <label className="v-label">Rooms</label>
+          <input
+            type="number"
+            min="1"
+            value={roomCount}
+            onChange={(e) => setRoomCount(Number(e.target.value))}
+          />
+        </div>
+        <div>
+          <label className="v-label">Guests</label>
+          <input
+            type="number"
+            min="1"
+            value={guests}
+            onChange={(e) => setGuests(Number(e.target.value))}
+          />
+        </div>
+      </div>
 
       {total > 0 && (
-        <p>
-          {nights} night(s): <b>${total}</b>
-        </p>
+        <div className="v-total">
+          <span className="v-muted">{nights} night(s)</span>
+          <span>
+            Total: <span className="v-gold">${total}</span>
+          </span>
+        </div>
       )}
-      {error && <p className="error">{error}</p>}
+
+      {error && <p className="v-msg v-msg-err" style={{ margin: 0 }}>{error}</p>}
 
       <button
-        className="cta"
+        className="v-btn v-btn-block"
         onClick={bookAndPay}
         disabled={busy || !checkIn || !checkOut}
       >
-        {busy ? 'Please wait...' : user ? 'Book and pay' : 'Log in to book'}
+        {busy ? 'Please wait…' : user ? 'Book and pay' : 'Log in to book'}
       </button>
     </aside>
   );

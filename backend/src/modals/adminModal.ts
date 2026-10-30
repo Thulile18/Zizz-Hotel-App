@@ -4,6 +4,7 @@ import { pool } from '../config/db';
 export async function listAllBookings() {
   const result = await pool.query(
     `SELECT b.id, b.check_in, b.check_out, b.rooms_booked, b.guests, b.total_price, b.status,
+            b.checked_in_at, b.checked_out_at,
             u.name AS guest_name, u.email AS guest_email, u.phone AS guest_phone,
             h.name AS hotel, r.type AS room_type
      FROM bookings b
@@ -36,6 +37,16 @@ export async function updateBookingDates(id: number, checkIn: string, checkOut: 
     'UPDATE bookings SET check_in = $1, check_out = $2, total_price = $3 WHERE id = $4',
     [checkIn, checkOut, totalPrice, id]
   );
+}
+
+// The front desk records the moment a guest arrives
+export async function markCheckedIn(id: number) {
+  await pool.query('UPDATE bookings SET checked_in_at = now() WHERE id = $1', [id]);
+}
+
+// ...and the moment they leave
+export async function markCheckedOut(id: number) {
+  await pool.query('UPDATE bookings SET checked_out_at = now() WHERE id = $1', [id]);
 }
 
 // Send one message to every guest (admins do not get promotions)

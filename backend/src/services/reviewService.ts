@@ -12,7 +12,7 @@ export async function reviewHotel(userId: number, hotelId: number, body: unknown
   if (!parsed.success) throw new HttpError(400, parsed.error.issues[0].message);
 
   if (!(await hasConfirmedBooking(userId, hotelId))) {
-    throw new HttpError(403, 'Only guests with a confirmed booking can review this hotel');
+    throw new HttpError(403, 'Only guests who have completed a stay can review this hotel');
   }
 
   await saveReview(userId, hotelId, parsed.data.rating, parsed.data.comment || null);

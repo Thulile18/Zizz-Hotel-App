@@ -8,6 +8,7 @@ interface HotelRow {
   name: string;
   city: string;
   stars: number;
+  property_type?: string | null;
 }
 
 interface RoomDetails {
@@ -21,20 +22,47 @@ interface RoomDetails {
 interface HotelDetails {
   id: number;
   name: string;
+  tagline: string | null;
   description: string | null;
   address: string;
   city: string;
+  region: string | null;
+  country: string | null;
   lat: string | null;
   lng: string | null;
   stars: number;
+  property_type: string | null;
+  tags: string[] | null;
+  is_featured: boolean | null;
   facilities: string[];
   policies: string | null;
   rooms: RoomDetails[];
 }
 
+// The kinds of stay you can list. Guests can filter by these.
+const PROPERTY_TYPES = [
+  'Hotel',
+  'Boutique Hotel',
+  'Resort',
+  'Guesthouse',
+  'Bed & Breakfast',
+  'Apartment',
+  'Villa',
+  'Safari Lodge',
+  'Lodge',
+  'Riad',
+  'Ryokan',
+  'Country Manor',
+  'Villa Resort',
+];
+
 const emptyForm = {
   name: '',
+  propertyType: 'Hotel',
+  tagline: '',
   city: '',
+  region: '',
+  country: 'South Africa',
   address: '',
   stars: 4,
   lat: '',
@@ -42,14 +70,20 @@ const emptyForm = {
   description: '',
   policies: '',
   facilities: '',
+  tags: '',
+  featured: false,
   images: '',
   roomType: 'Double',
   capacity: 2,
-  price: 100,
+  price: 1500,
   count: 5,
+  roomDescription: '',
+  roomAmenities: '',
 };
 
 type Form = typeof emptyForm;
+
+const splitList = (text: string) => text.split(',').map((s) => s.trim()).filter(Boolean);
 
 export default function AdminHotels() {
   const navigate = useNavigate();
@@ -88,7 +122,7 @@ export default function AdminHotels() {
     setRooms([]);
   }
 
-  // Fill the form with an existing hotel, ready to edit
+  // Fill the form with an existing stay, ready to edit
   async function startEdit(id: number) {
     setError('');
     setMessage('');
@@ -97,7 +131,11 @@ export default function AdminHotels() {
       setForm({
         ...emptyForm,
         name: h.name,
+        propertyType: h.property_type ?? 'Hotel',
+        tagline: h.tagline ?? '',
         city: h.city,
+        region: h.region ?? '',
+        country: h.country ?? '',
         address: h.address,
         stars: h.stars,
         lat: h.lat ?? '',
@@ -105,6 +143,8 @@ export default function AdminHotels() {
         description: h.description ?? '',
         policies: h.policies ?? '',
         facilities: h.facilities.join(', '),
+        tags: (h.tags ?? []).join(', '),
+        featured: Boolean(h.is_featured),
       });
       setRooms(h.rooms);
       setEditingId(id);
@@ -114,7 +154,7 @@ export default function AdminHotels() {
     }
   }
 
-  // Add a new hotel, or save changes to the one being edited
+  // Add a new stay, or save changes to the one being edited
   async function submitHotel() {
     setError('');
     setMessage('');
@@ -128,21 +168,26 @@ export default function AdminHotels() {
 
     const details = {
       name: form.name,
+      property_type: form.propertyType,
+      tagline: form.tagline || undefined,
       city: form.city,
+      region: form.region || undefined,
+      country: form.country || undefined,
       address: form.address,
       stars: form.stars,
+      is_featured: form.featured,
+      tags: splitList(form.tags),
       description: form.description || undefined,
       policies: form.policies || undefined,
       lat: form.lat ? latNumber : undefined,
       lng: form.lng ? lngNumber : undefined,
-      
-      facilities: form.facilities.split(',').map((s) => s.trim()).filter(Boolean),
+      facilities: splitList(form.facilities),
     };
 
     try {
       if (editingId) {
         await api(`/hotels/${editingId}`, 'PUT', details);
-        setMessage('Hotel updated.');
+        setMessage('Stay updated.');
       } else {
         await api('/hotels', 'POST', {
           ...details,
@@ -153,10 +198,12 @@ export default function AdminHotels() {
               capacity: form.capacity,
               price_per_night: form.price,
               total_rooms: form.count,
+              description: form.roomDescription || undefined,
+              amenities: splitList(form.roomAmenities),
             },
           ],
         });
-        setMessage('Hotel added.');
+        setMessage('Stay added.');
         clearForm();
       }
       loadHotels();
@@ -199,152 +246,222 @@ export default function AdminHotels() {
   }
 
   if (!user) return null;
-  if (!isAdmin) return <p>Sorry, this page is for admins only.</p>;
+  if (!isAdmin) {
+    return (
+      <div className="v-center">
+        <div className="v-status-card v-status-card-error">
+          <p className="v-error">Sorry, this page is for admins only.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="stack">
-      <h2>Manage hotels</h2>
-      <Link to="/admin">← Back to reservations</Link>
-      {message && <p>{message}</p>}
-      {error && <p className="error">{error}</p>}
-
-      <section className="panel wide">
-        <h3>{editingId ? 'Edit hotel' : 'Add a hotel'}</h3>
-        <div className="formgrid">
-          <label>
-            Name
-            <input value={form.name} onChange={(e) => set('name', e.target.value)} />
-          </label>
-          <label>
-            City
-            <input value={form.city} onChange={(e) => set('city', e.target.value)} />
-          </label>
-          <label>
-            Address
-            <input value={form.address} onChange={(e) => set('address', e.target.value)} />
-          </label>
-          <label>
-            Stars (1 to 5)
-            <input type="number" min="1" max="5" value={form.stars} onChange={(e) => set('stars', Number(e.target.value))} />
-          </label>
-          <label>
-            Latitude (for the map)
-            <input value={form.lat} onChange={(e) => set('lat', e.target.value)} placeholder="-29.8587" />
-          </label>
-          <label>
-            Longitude (for the map)
-            <input value={form.lng} onChange={(e) => set('lng', e.target.value)} placeholder="31.0218" />
-          </label>
-          <label>
-            Facilities (separated by commas)
-            <input value={form.facilities} onChange={(e) => set('facilities', e.target.value)} placeholder="WiFi, Pool, Parking" />
-          </label>
+    <div className="v-page">
+      <div className="v-pagehead">
+        <div>
+          <p className="eyebrow">Inventory control</p>
+          <h1 className="v-title">Manage stays</h1>
         </div>
-        <label>
-          Description
-          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} />
-        </label>
-        <label>
-          Policies
-          <textarea value={form.policies} onChange={(e) => set('policies', e.target.value)} />
-        </label>
+        <Link to="/admin" className="v-textlink">← Back to dashboard</Link>
+      </div>
 
-        {!editingId && (
-          <>
-            <label>
-              Photo links (one per line)
-              <textarea value={form.images} onChange={(e) => set('images', e.target.value)} placeholder="https://picsum.photos/seed/hotel3/800/500" />
-            </label>
-            <h4>First room type</h4>
-            <div className="formgrid">
-              <label>
-                Room type
-                <input value={form.roomType} onChange={(e) => set('roomType', e.target.value)} />
-              </label>
-              <label>
-                Sleeps
-                <input type="number" min="1" value={form.capacity} onChange={(e) => set('capacity', Number(e.target.value))} />
-              </label>
-              <label>
-                Price per night ($)
-                <input type="number" min="1" value={form.price} onChange={(e) => set('price', Number(e.target.value))} />
-              </label>
-              <label>
-                Rooms available
-                <input type="number" min="0" value={form.count} onChange={(e) => set('count', Number(e.target.value))} />
-              </label>
-            </div>
-          </>
-        )}
+      <div className="v-admin-grid">
+        {/* Left: add / edit form and rooms */}
+        <div className="v-stack">
+          {message && <p className="v-msg v-msg-ok fade-up">{message}</p>}
+          {error && <p className="v-msg v-msg-err fade-up">{error}</p>}
 
-        <div className="actions">
-          <button className="cta" onClick={submitHotel}>
-            {editingId ? 'Save changes' : 'Add hotel'}
-          </button>
-          {editingId && <button onClick={clearForm}>Stop editing</button>}
-        </div>
+          <section className="v-panel fade-up">
+            <h3 className="v-panel-title">{editingId ? 'Edit stay' : 'Add a new stay'}</h3>
 
-        {editingId && (
-          <>
-            <h4>Rooms: price and availability</h4>
-            {rooms.map((room) => (
-              <div key={room.id} className="formgrid">
-                <p>
-                  <b>{room.type}</b> (sleeps {room.capacity})
-                </p>
-                <label>
-                  Price per night ($)
-                  <input
-                    type="number"
-                    min="1"
-                    value={room.price_per_night}
-                    onChange={(e) => changeRoom(room.id, 'price_per_night', e.target.value)}
-                  />
-                </label>
-                <label>
-                  Rooms available
-                  <input
-                    type="number"
-                    min="0"
-                    value={room.total_rooms}
-                    onChange={(e) => changeRoom(room.id, 'total_rooms', e.target.value)}
-                  />
-                </label>
-                <button onClick={() => saveRoom(room)}>Save room</button>
+            <div className="v-form-grid">
+              <div className="v-field">
+                <label className="v-label">Name</label>
+                <input value={form.name} onChange={(e) => set('name', e.target.value)} />
               </div>
-            ))}
-          </>
-        )}
-      </section>
+              <div className="v-field">
+                <label className="v-label">Type of stay</label>
+                <select value={form.propertyType} onChange={(e) => set('propertyType', e.target.value)}>
+                  {PROPERTY_TYPES.map((t) => (
+                    <option key={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="v-field v-span-2">
+                <label className="v-label">Tagline</label>
+                <input
+                  value={form.tagline}
+                  onChange={(e) => set('tagline', e.target.value)}
+                  placeholder="A short line guests will see under the name"
+                />
+              </div>
+              <div className="v-field">
+                <label className="v-label">City</label>
+                <input value={form.city} onChange={(e) => set('city', e.target.value)} />
+              </div>
+              <div className="v-field">
+                <label className="v-label">Province or state</label>
+                <input value={form.region} onChange={(e) => set('region', e.target.value)} />
+              </div>
+              <div className="v-field">
+                <label className="v-label">Country</label>
+                <input value={form.country} onChange={(e) => set('country', e.target.value)} />
+              </div>
+              <div className="v-field">
+                <label className="v-label">Stars (1 to 5)</label>
+                <input type="number" min="1" max="5" value={form.stars} onChange={(e) => set('stars', Number(e.target.value))} />
+              </div>
+              <div className="v-field v-span-2">
+                <label className="v-label">Address</label>
+                <input value={form.address} onChange={(e) => set('address', e.target.value)} />
+              </div>
+              <div className="v-field">
+                <label className="v-label">Latitude</label>
+                <input value={form.lat} onChange={(e) => set('lat', e.target.value)} placeholder="-29.8587" />
+              </div>
+              <div className="v-field">
+                <label className="v-label">Longitude</label>
+                <input value={form.lng} onChange={(e) => set('lng', e.target.value)} placeholder="31.0218" />
+              </div>
+              <div className="v-field v-span-2">
+                <label className="v-label">Facilities (comma-separated)</label>
+                <input value={form.facilities} onChange={(e) => set('facilities', e.target.value)} placeholder="Wi-Fi, Pool, Parking" />
+              </div>
+              <div className="v-field v-span-2">
+                <label className="v-label">Tags (comma-separated, used for moods)</label>
+                <input
+                  value={form.tags}
+                  onChange={(e) => set('tags', e.target.value)}
+                  placeholder="romantic, beach, nature, luxury, city, hidden-gem, family, spa, affordable"
+                />
+              </div>
+              <div className="v-field v-span-2">
+                <label className="v-label">Description</label>
+                <textarea value={form.description} onChange={(e) => set('description', e.target.value)} rows={3} />
+              </div>
+              <div className="v-field v-span-2">
+                <label className="v-label">Policies</label>
+                <textarea value={form.policies} onChange={(e) => set('policies', e.target.value)} rows={2} />
+              </div>
+              <div className="v-check v-span-2">
+                <input
+                  id="featured"
+                  type="checkbox"
+                  checked={form.featured}
+                  onChange={(e) => set('featured', e.target.checked)}
+                />
+                <label htmlFor="featured">Show on the home page as a featured address</label>
+              </div>
+            </div>
 
-      <h3>Your hotels</h3>
-      {hotels.length === 0 && <p>No hotels yet. Add the first one above.</p>}
-      <div className="scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>City</th>
-              <th>Stars</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {hotels.map((h) => (
-              <tr key={h.id}>
-                <td>{h.name}</td>
-                <td>{h.city}</td>
-                <td>{'★'.repeat(h.stars)}</td>
-                <td>
-                  <div className="actions">
-                    <button onClick={() => startEdit(h.id)}>Edit</button>
-                    <button onClick={() => removeHotel(h)}>Delete</button>
+            {!editingId && (
+              <div className="v-subsection">
+                <h4>First room type</h4>
+                <div className="v-rooms-grid">
+                  <div className="v-field">
+                    <label className="v-label">Room type</label>
+                    <input value={form.roomType} onChange={(e) => set('roomType', e.target.value)} />
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  <div className="v-field">
+                    <label className="v-label">Sleeps</label>
+                    <input type="number" min="1" value={form.capacity} onChange={(e) => set('capacity', Number(e.target.value))} />
+                  </div>
+                  <div className="v-field">
+                    <label className="v-label">Price per night (R)</label>
+                    <input type="number" min="1" value={form.price} onChange={(e) => set('price', Number(e.target.value))} />
+                  </div>
+                  <div className="v-field">
+                    <label className="v-label">Available</label>
+                    <input type="number" min="0" value={form.count} onChange={(e) => set('count', Number(e.target.value))} />
+                  </div>
+                </div>
+                <div className="v-field">
+                  <label className="v-label">Room description</label>
+                  <textarea value={form.roomDescription} onChange={(e) => set('roomDescription', e.target.value)} rows={2} />
+                </div>
+                <div className="v-field">
+                  <label className="v-label">Room amenities (comma-separated)</label>
+                  <input value={form.roomAmenities} onChange={(e) => set('roomAmenities', e.target.value)} placeholder="Sea view, Free Wi-Fi, Breakfast included" />
+                </div>
+                <div className="v-field">
+                  <label className="v-label">Photo links (one per line, like /images/my-hotel.jpg)</label>
+                  <textarea value={form.images} onChange={(e) => set('images', e.target.value)} rows={3} placeholder="/images/my-hotel-cover.jpg" />
+                </div>
+              </div>
+            )}
+
+            <div className="v-form-actions">
+              <button className="v-btn" onClick={submitHotel}>
+                {editingId ? 'Save changes' : 'Add stay'}
+              </button>
+              {editingId && (
+                <button className="v-btn v-btn-outline" onClick={clearForm}>
+                  Cancel
+                </button>
+              )}
+            </div>
+          </section>
+
+          {editingId && rooms.length > 0 && (
+            <section className="v-panel fade-up">
+              <h3 className="v-panel-title">Rooms</h3>
+              <div>
+                {rooms.map((r) => (
+                  <div key={r.id} className="v-roomrow">
+                    <div>
+                      <span className="v-cell-main">{r.type}</span>
+                      <span className="v-cell-sub">Sleeps up to {r.capacity} guests</span>
+                    </div>
+                    <div className="v-roomrow-controls">
+                      <span className="v-muted">R</span>
+                      <input
+                        type="number"
+                        className="v-input-sm"
+                        value={r.price_per_night}
+                        onChange={(e) => changeRoom(r.id, 'price_per_night', e.target.value)}
+                      />
+                      <span className="v-muted">Available:</span>
+                      <input
+                        type="number"
+                        className="v-input-sm"
+                        value={r.total_rooms}
+                        onChange={(e) => changeRoom(r.id, 'total_rooms', e.target.value)}
+                      />
+                      <button className="v-linkbtn" onClick={() => saveRoom(r)}>Update</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+
+        {/* Right: list of stays */}
+        <div className="v-stack">
+          <h3 className="v-panel-title">Your stays</h3>
+          {hotels.length === 0 ? (
+            <p className="v-muted">No stays yet. Add your first one.</p>
+          ) : (
+            <div className="v-hotel-list fade-up">
+              {hotels.map((h) => (
+                <div key={h.id} className="v-hotel-item">
+                  <div>
+                    <span className="v-cell-main">{h.name}</span>
+                    <span className="v-cell-sub">
+                      {h.property_type ? `${h.property_type} · ` : ''}
+                      {h.city} · <span className="v-gold">{'★'.repeat(h.stars)}</span>
+                    </span>
+                  </div>
+                  <div className="v-row-actions">
+                    <button className="v-linkbtn" onClick={() => startEdit(h.id)}>Edit</button>
+                    <button className="v-linkbtn muted danger" onClick={() => removeHotel(h)}>Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
