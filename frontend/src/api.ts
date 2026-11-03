@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:3000/api';
+// The backend address. On Vercel it comes from VITE_API_URL.
+// On your own computer it falls back to localhost.
+const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api').replace(/\/+$/, '');
 
 // One helper for every request to the backend
 export async function api<T>(path: string, method = 'GET', body?: unknown): Promise<T> {

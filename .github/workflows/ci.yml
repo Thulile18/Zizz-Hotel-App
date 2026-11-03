@@ -15,6 +15,7 @@ jobs:
         working-directory: backend
     env:
       JWT_SECRET: ci-only-secret-that-is-at-least-32-characters-long
+      DATABASE_URL: postgres://ci:ci@localhost:5432/ci
     steps:
       - uses: actions/checkout@v4
 

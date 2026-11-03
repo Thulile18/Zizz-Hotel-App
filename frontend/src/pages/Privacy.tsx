@@ -32,7 +32,7 @@ export default function Privacy() {
         <div>
           <h3>Who else sees it</h3>
          <li>
-            <b>OpenStreetMap</b> receives the place name you type into "find stays near a place", so we can
+            <b>OpenStreetMap</b> Hotel maps are loaded from Google Maps, which receives your IP address when a map appears and receives the place name you type into "find stays near a place", so we can
           work out distances. Your device location, if you tap "Near me", stays in your browser and is
           never sent to our servers.
         </li>

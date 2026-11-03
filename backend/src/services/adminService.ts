@@ -80,6 +80,7 @@ export async function changeReservation(bookingId: number, body: unknown) {
   if (nights < 1) throw new HttpError(400, 'Check-out must be after check-in');
 
   const room = await findRoomById(booking.room_id);
+    if (!room) throw new HttpError(404, 'Room not found');
 
   // A booking that stays active needs free rooms on its dates
   if (newStatus !== 'cancelled') {
