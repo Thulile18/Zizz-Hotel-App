@@ -44,14 +44,27 @@ export default function PrivacyControls() {
   }
 
   return (
-    <section className="panel">
-      <h3>Your data and privacy</h3>
-      <p>You can download everything we hold about you, or delete your account.</p>
-      {message && <p>{message}</p>}
-      {error && <p className="error">{error}</p>}
-      <div className="actions">
-        <button onClick={download}>Download my data</button>
-        <button onClick={deleteAccount}>Delete my account</button>
+    <section className="v-panel fade-up">
+      <div>
+        <p className="eyebrow">Your rights</p>
+        <h3>Your data and privacy</h3>
+      </div>
+
+      <p className="v-panel-text">
+        You can download a copy of the personal information we hold about you, or permanently
+        delete your account.
+      </p>
+
+      {message && <p className="v-msg v-msg-ok" style={{ margin: 0 }}>{message}</p>}
+      {error && <p className="v-msg v-msg-err" style={{ margin: 0 }}>{error}</p>}
+
+      <div className="v-btn-row">
+        <button className="v-btn v-btn-sm v-btn-outline" onClick={download}>
+          Download my data
+        </button>
+        <button className="v-btn v-btn-sm v-btn-outline" onClick={deleteAccount}>
+          Delete my account
+        </button>
       </div>
     </section>
   );

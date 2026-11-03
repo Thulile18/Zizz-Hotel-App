@@ -26,7 +26,12 @@ export async function register(req: Request, res: Response) {
     const result = await registerUser(name, email, password);
     res.status(201).json(result);
   } catch (err) {
-    res.status(409).json({ error: (err as Error).message });
+    const message = (err as Error).message;
+    // Let known, friendly messages through; hide technical ones
+    const friendly = /already|exists|registered|taken/i.test(message);
+    res.status(friendly ? 409 : 500).json({
+      error: friendly ? message : 'Something went wrong. Please try again.',
+    });
   }
 }
 

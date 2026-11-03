@@ -37,13 +37,24 @@ export default function GitHubCallback() {
 
   if (error) {
     return (
-      <div className="form">
-        <h2>We could not sign you in</h2>
-        <p className="error">{error}</p>
-        <Link to="/login">Back to login</Link>
+      <div className="v-center">
+        <div className="v-status-card v-status-card-error fade-up">
+          <p className="eyebrow" style={{ marginBottom: 12 }}>Sign-in failed</p>
+          <h2>We could not sign you in</h2>
+          <p className="v-msg v-msg-err">{error}</p>
+          <Link to="/login" className="v-textlink">Back to login</Link>
+        </div>
       </div>
     );
   }
 
-  return <p>Signing you in with GitHub...</p>;
+  return (
+    <div className="v-center">
+      <div className="v-status-card fade-up">
+        <p className="eyebrow" style={{ marginBottom: 12 }}>Secure sign-in</p>
+        <p className="v-status-text v-pulse">Signing you in with GitHub…</p>
+        <div className="v-spinner" />
+      </div>
+    </div>
+  );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { api } from '../api';
+import SuccessBurst from '../components/SuccessBurst';
 
 export default function BookingConfirmed() {
   const [params] = useSearchParams();
@@ -25,25 +26,44 @@ export default function BookingConfirmed() {
       });
   }, [bookingId]);
 
-  if (state === 'checking') return <p>Checking your payment...</p>;
+  if (state === 'checking') {
+    return (
+      <div className="v-center">
+        <p className="eyebrow v-pulse">Confirming your payment…</p>
+      </div>
+    );
+  }
 
   if (state === 'failed') {
     return (
-      <div className="form">
-        <h2>We could not confirm your booking</h2>
-        <p className="error">{message}</p>
-        <Link to="/">Back to all hotels</Link>
+      <div className="v-center">
+        <div className="v-status-card v-status-card-error fade-up">
+          <p className="eyebrow" style={{ marginBottom: 12 }}>Something went wrong</p>
+          <h2>We could not confirm your stay</h2>
+          <p className="v-msg v-msg-err">{message}</p>
+          <Link to="/" className="v-textlink">Back to all hotels</Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="form">
-      <h2>Booking confirmed</h2>
-      <p>Thank you! Your payment was received and your booking number is {bookingId}.</p>
-      <Link to="/">
-        <button className="cta">Find more hotels</button>
-      </Link>
+    <div className="v-center">
+      <div className="v-status-card fade-up">
+        <SuccessBurst
+          inline
+          title="Thank you. Your stay is reserved."
+          text="Your payment was received and your reservation is confirmed. We look forward to welcoming you."
+        />
+        <div className="v-ticket">
+          <span className="v-ticket-label">Booking no.</span>
+          <span className="v-gold">#{bookingId}</span>
+        </div>
+        <Link to="/profile" className="v-btn v-btn-block">View my stays</Link>
+        <p style={{ marginTop: 16 }}>
+          <Link to="/hotels" className="v-textlink">Find more stays</Link>
+        </p>
+      </div>
     </div>
   );
 }

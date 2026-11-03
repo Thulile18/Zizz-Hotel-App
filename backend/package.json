@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc --noEmit false",
+    "start": "node dist/server.js",
     "test": "tsx --test src/tests/auth.test.ts",
-    "dev": "tsx src/server.ts"
+    "db:setup": "tsx src/scripts/setupDatabase.ts"
   },
   "keywords": [],
   "author": "",

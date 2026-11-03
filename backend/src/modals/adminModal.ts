@@ -4,6 +4,7 @@ import { pool } from '../config/db';
 export async function listAllBookings() {
   const result = await pool.query(
     `SELECT b.id, b.check_in, b.check_out, b.rooms_booked, b.guests, b.total_price, b.status,
+            b.checked_in_at, b.checked_out_at,
             u.name AS guest_name, u.email AS guest_email, u.phone AS guest_phone,
             h.name AS hotel, r.type AS room_type
      FROM bookings b
@@ -38,10 +39,22 @@ export async function updateBookingDates(id: number, checkIn: string, checkOut: 
   );
 }
 
-// Send one message to every guest (admins do not get promotions)
+// The front desk records the moment a guest arrives
+export async function markCheckedIn(id: number) {
+  await pool.query('UPDATE bookings SET checked_in_at = now() WHERE id = $1', [id]);
+}
+
+// ...and the moment they leave
+export async function markCheckedOut(id: number) {
+  await pool.query('UPDATE bookings SET checked_out_at = now() WHERE id = $1', [id]);
+}
+
+// Send the same message to every guest account (admins and deleted accounts are skipped)
 export async function notifyAllGuests(message: string) {
   const result = await pool.query(
-    "INSERT INTO notifications (user_id, message) SELECT id, $1 FROM users WHERE role = 'user'",
+    `INSERT INTO notifications (user_id, message)
+     SELECT id, $1::text FROM users
+     WHERE role = 'user' AND email NOT LIKE '%@deleted.invalid'`,
     [message]
   );
   return result.rowCount ?? 0;
