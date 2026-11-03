@@ -49,7 +49,9 @@ CREATE TABLE rooms (
   capacity        INT NOT NULL,
   price_per_night NUMERIC(10,2) NOT NULL,
   total_rooms     INT NOT NULL,
-  image_path      TEXT
+  image_path      TEXT,
+  description     TEXT,
+  amenities       TEXT[] DEFAULT '{}'
 );
 
 -- 5. BOOKINGS: which user booked which room, and when
@@ -65,6 +67,8 @@ CREATE TABLE bookings (
   status            TEXT NOT NULL DEFAULT 'pending'
                     CHECK (status IN ('pending', 'confirmed', 'cancelled')),
   stripe_session_id TEXT,
+  checked_in_at     TIMESTAMPTZ,  -- when the front desk checked the guest in
+  checked_out_at    TIMESTAMPTZ,  -- when the guest left; the stay is complete after this
   created_at        TIMESTAMPTZ DEFAULT now()
 );
 
