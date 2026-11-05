@@ -45,7 +45,7 @@ export default function App() {
         <div className="v-footer-inner">
           <span className="v-footer-brand">VELOUR</span>
           <span>
-            Hotels in 12 cities worldwide · Prices shown are approximate when not in Rand ·{' '}
+            Hotels in cities around the world · Prices shown are approximate when not in Rand ·{' '}
             <Link to="/privacy">Privacy policy</Link>
           </span>
         </div>
