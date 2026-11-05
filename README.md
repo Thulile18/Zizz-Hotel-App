@@ -1,4 +1,4 @@
-# Zizz Hotels
+# Velour
 
 A hotel booking web app. Guests can search stays, look at photos, a map, prices, facilities and policies, save favourites, book rooms and pay, leave reviews and manage their profile. Admins manage hotels, rooms and reservations.
 
@@ -224,6 +224,7 @@ These were considered and left out:
 - Place search uses OpenStreetMap's free service, which is meant for light use.
 - Tests cover the login and admin guards only.
 - Availability is checked and the booking is saved in two separate steps, so two guests booking the last room at the very same moment could both succeed.
+- If a payment attempt fails or is abandoned, the booking stays in the list as "Awaiting payment" until the guest or an admin cancels it. It stops blocking the rooms after 30 minutes.
 
 ## Demo order
 

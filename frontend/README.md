@@ -1,4 +1,4 @@
-# Zizz Hotels: frontend
+# Velour: frontend
 
 React and TypeScript single-page app, built with Vite. It uses Redux Toolkit for shared state and React Router for pages. All data comes from the backend API.
 

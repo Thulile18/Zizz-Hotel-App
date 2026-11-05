@@ -43,7 +43,7 @@ export async function loginWithGitHub(body: unknown) {
   const headers = {
     Authorization: `Bearer ${tokenData.access_token}`,
     Accept: 'application/vnd.github+json',
-    'User-Agent': 'zizz-hotels',
+    'User-Agent': 'velour-hotels',
   };
 
   // Step 2: who is this person?
