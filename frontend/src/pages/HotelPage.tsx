@@ -159,6 +159,7 @@ export default function HotelPage() {
   const [guests, setGuests] = useState(
     Math.min(20, Math.max(1, Number(searchParams.get('guests')) || 2)),
   );
+  const [roomsWanted, setRoomsWanted] = useState(1);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [bookError, setBookError] = useState('');
 
@@ -253,9 +254,8 @@ export default function HotelPage() {
   }
 
   function open(origin?: string) {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}${
-      origin ? `&origin=${origin}` : ''
-    }`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}${origin ? `&origin=${origin}` : ''
+      }`;
     window.open(url, '_blank', 'noopener');
   }
 
@@ -363,7 +363,7 @@ export default function HotelPage() {
             <h2 className="v-h3">Rooms &amp; suites</h2>
             <div>
               {hotel.rooms.map((r) => {
-                const roomsNeeded = Math.max(1, Math.ceil(guests / r.capacity));
+                const roomsNeeded = Math.max(roomsWanted, Math.ceil(guests / r.capacity));
                 const total = Number(r.price_per_night) * nights * roomsNeeded;
                 return (
                   <article key={r.id} className="v-room fade-up">
@@ -526,6 +526,16 @@ export default function HotelPage() {
                   max={20}
                   value={guests}
                   onChange={(e) => setGuests(Math.max(1, Number(e.target.value) || 1))}
+                />
+              </div>
+              <div>
+                <label className="v-label">Rooms</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={roomsWanted}
+                  onChange={(e) => setRoomsWanted(Math.max(1, Number(e.target.value) || 1))}
                 />
               </div>
               <p className="v-panel-text">

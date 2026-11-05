@@ -125,10 +125,14 @@ export default function ProfilePage() {
   }
 
   async function cancel(id: number) {
-    if (!window.confirm('Cancel this booking?')) return;
-    await api(`/bookings/${id}`, 'DELETE');
-    loadBookings();
-    api<Notification[]>('/notifications').then(setNotes);
+    if (!window.confirm('Cancel this booking? A payment is not refunded automatically.')) return;
+    try {
+      await api(`/bookings/${id}`, 'DELETE');
+      loadBookings();
+      api<Notification[]>('/notifications').then(setNotes);
+    } catch (err) {
+      setError((err as Error).message);
+    }
   }
 
   if (!user) return null;

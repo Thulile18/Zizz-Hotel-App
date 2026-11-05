@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
- "scripts": {
-  "dev": "tsx watch src/server.ts",
-  "build": "tsc --noEmit false",
-  "start": "node dist/server.js",
-  "test": "tsx --test src/tests/auth.test.ts"
-},
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc --noEmit false",
+    "start": "node dist/server.js",
+    "test": "tsx --test src/tests/auth.test.ts",
+    "db:setup": "tsx src/scripts/setupDatabase.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

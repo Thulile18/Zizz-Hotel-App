@@ -1,10 +1,9 @@
+// 1. Imports
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import compression from 'compression';
-import fs from 'fs';
-import path from 'path';
 import { env } from './config/env';
 import { pool } from './config/db';
 import authRoutes from './routes/authRoutes';
@@ -19,6 +18,10 @@ import offerRoutes from './routes/offerRoutes';
 
 // 2. Configuration
 const app = express();
+
+// Render puts a proxy in front of the server. Trusting it lets the rate limiters
+// see each visitor's real address instead of the proxy's address.
+app.set('trust proxy', 1);
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -70,27 +73,13 @@ app.use((err: { status?: number }, _req: Request, res: Response, _next: NextFunc
   res.status(500).json({ error: 'Something went wrong' });
 });
 
-// 6. Start Server and Test Database Connection
+// 6. Start the server and check the database connection
 app.listen(env.PORT, async () => {
-  console.log(`Server is running at http://localhost:${env.PORT}`);
-
+  console.log(`Server is running on port ${env.PORT}`);
   try {
-    // 1. Verify connection
-    const res = await pool.query('SELECT NOW()');
-    console.log(' Connected to the Database successfully at:', res.rows[0].now);
-
-    // 2. Automatically load your schema.sql tables into Render
-    // (Assumes schema.sql is sitting in the root of your project folder)
-    const schemaPath = path.join(process.cwd(), 'schema.sql');
-    if (fs.existsSync(schemaPath)) {
-      const schemaSql = fs.readFileSync(schemaPath, 'utf8');
-      await pool.query(schemaSql);
-      console.log(':white_tick: Database schema loaded / verified successfully!');
-    } else {
-      console.log(':warning: schema.sql file not found in root directory, skipping auto-migration.');
-    }
-
+    const result = await pool.query('SELECT NOW()');
+    console.log('Connected to the database at:', result.rows[0].now);
   } catch (err) {
-    console.error(' Failed to initialize database:', err);
+    console.error('Could not connect to the database:', err);
   }
 });

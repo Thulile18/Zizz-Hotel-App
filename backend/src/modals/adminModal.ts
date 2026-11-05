@@ -49,10 +49,12 @@ export async function markCheckedOut(id: number) {
   await pool.query('UPDATE bookings SET checked_out_at = now() WHERE id = $1', [id]);
 }
 
-// Send one message to every guest (admins do not get promotions)
+// Send the same message to every guest account (admins and deleted accounts are skipped)
 export async function notifyAllGuests(message: string) {
   const result = await pool.query(
-    "INSERT INTO notifications (user_id, message) SELECT id, $1 FROM users WHERE role = 'user'",
+    `INSERT INTO notifications (user_id, message)
+     SELECT id, $1::text FROM users
+     WHERE role = 'user' AND email NOT LIKE '%@deleted.invalid'`,
     [message]
   );
   return result.rowCount ?? 0;
