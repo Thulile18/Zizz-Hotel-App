@@ -57,7 +57,7 @@ export default function Login() {
 
         <a
           className="v-btn v-btn-outline v-btn-block"
-          href={`https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&scope=user:email`}
+          href={`https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&scope=user:email&prompt=select_account`}
         >
           Continue with GitHub
         </a>
