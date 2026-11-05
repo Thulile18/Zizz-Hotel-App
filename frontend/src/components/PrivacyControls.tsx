@@ -19,7 +19,7 @@ export default function PrivacyControls() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'my-zizz-hotels-data.json';
+      link.download = 'my-velour-data.json';
       link.click();
       URL.revokeObjectURL(url);
       setMessage('Your data was downloaded.');
