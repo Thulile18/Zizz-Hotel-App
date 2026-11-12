@@ -6,6 +6,10 @@ The project has three parts: a React frontend, a Node.js (Express, TypeScript) b
 
 Detailed documentation: [backend/README.md](backend/README.md) and [frontend/README.md](frontend/README.md).
 
+Socialify Image
+
+<img src="https://socialify.git.ci/Thulile18/Zizz-Hotel-App/image?language=1&owner=1&name=1&stargazers=1&theme=Light" alt="Zizz-Hotel-App" width="640" height="320" />
+
 ## What guests can do
 
 - Register and log in with email and password, or with GitHub (OAuth).
